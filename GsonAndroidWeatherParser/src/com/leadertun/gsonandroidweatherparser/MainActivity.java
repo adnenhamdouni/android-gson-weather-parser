@@ -136,15 +136,10 @@ public class MainActivity extends ActionBarActivity {
             setWeatherIcon(icon);
             // mIcone.setText(icon);
 
-            Resources res = getResources();
-            String mDrawableName = "ic_weather_" + icon;
-            int resID = res.getIdentifier(mDrawableName, "drawable",
-                    getPackageName());
-            Drawable drawable = res.getDrawable(resID);
-            mIconView.setImageDrawable(drawable);
-            // updateIconeView(id);
+            updateIconeView(icon);
         }
 
+        
     }
 
     private double convertTempCelsius(double currentTemp) {
@@ -166,6 +161,17 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         builder.show();
+    }
+    
+    private void updateIconeView(String icon) {
+        
+        Resources res = getResources();
+        String mDrawableName = "ic_weather_" + icon;
+        int resID = res.getIdentifier(mDrawableName, "drawable",
+                getPackageName());
+        Drawable drawable = res.getDrawable(resID);
+        mIconView.setImageDrawable(drawable);
+        
     }
 
     private void setWeatherIcon(String icon) {
