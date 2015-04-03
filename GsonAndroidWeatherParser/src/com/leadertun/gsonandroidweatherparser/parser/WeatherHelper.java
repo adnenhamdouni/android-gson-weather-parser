@@ -17,13 +17,15 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.leadertun.gsonandroidweatherparser.model.WeatherWrapper;
+import com.leadertun.gsonandroidweatherparser.model.WeatherResponseOneDayWrapper;
 
 public class WeatherHelper {
 
-    private  WeatherWrapper mWeatherWrapper;
+    private  WeatherResponseOneDayWrapper mWeatherWrapper;
 
     private static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather?q=";
+    private static String BASE_URL_FORECAST = "http://api.openweathermap.org/data/2.5/forecast/daily?q=";
+    
     private static String IMG_URL = "http://openweathermap.org/img/w/";
     
 

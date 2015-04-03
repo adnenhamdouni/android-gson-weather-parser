@@ -44,4 +44,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textview_layout_weather_icon"/>
 
+    <Button
+        android:id="@+id/button_weather_prediction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textview_layout_weather_iconview"
+        android:layout_marginTop="97dp"
+        android:text="5 days prediction" />
+
 </RelativeLayout>

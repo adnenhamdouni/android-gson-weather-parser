@@ -1,5 +1,9 @@
 package com.leadertun.gsonandroidweatherparser;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,29 +18,44 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.leadertun.gsonandroidweatherparser.model.WeatherResponseOneDayWrapper;
+import com.leadertun.gsonandroidweatherparser.model.WeatherResponseWrapper;
+import com.leadertun.gsonandroidweatherparser.model.WeatherResponseWrapper.List;
 import com.leadertun.gsonandroidweatherparser.model.WeatherWrapper;
 import com.leadertun.gsonandroidweatherparser.parser.WeatherHelper;
+import com.leadertun.gsonandroidweatherparser.parser.WeatherResponseHelper;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements OnClickListener {
 
-    private TextView mCity;
-    private TextView mTemperature;
-    private TextView mIcone;
-    private ImageView mIconView;
+    private TextView mCityTextView;
+    private TextView mTemperatureTextView;
+    private TextView mIconeTextView;
+    private ImageView mIconViewTextView;
+    private Button mWyeatherPredictionButton;
 
-    private WeatherWrapper mWeatherWrapper;
+    private WeatherResponseOneDayWrapper mWeatherWrapper;
 
-    private String city = "";
+    private WeatherWrapper mWeather;
+    private WeatherWrapper.Prevision mPrevision;
+    private ArrayList<WeatherWrapper.Prevision> mListPrevisions;
+
+    private String mCity = "";
+    private static String mNumberOfDay = "5";
 
     private static final String City = "cityKey";
     private SharedPreferences sharedpreferences;
     private static final String MyPREFERENCES = "MyPrefs";
+
+    private static final String LOG_TAG = "adnen";
 
     private Editor editor;
 
@@ -51,72 +70,93 @@ public class MainActivity extends ActionBarActivity {
         initView();
         initSharedPreferences();
 
-        mWeatherWrapper = new WeatherWrapper();
-        mWeatherWrapper.setCity(city);
+        mWeather = new WeatherWrapper();
+
+        mListPrevisions = new ArrayList<WeatherWrapper.Prevision>();
+
+        mWeatherWrapper = new WeatherResponseOneDayWrapper();
+        mWeatherWrapper.setCity(mCity);
+
+        if (mNumberOfDay == null) {
+            Log.v(LOG_TAG, "get only on day weather temperature");
+        }
+
+        else {
+
+            Log.v(LOG_TAG, "get weather temperature for " + mNumberOfDay
+                    + " days");
+        }
 
         updateWeatherData(mWeatherWrapper.getCity());
+        updateWeatherResponseData(mWeatherWrapper.getCity(), mNumberOfDay);
 
     }
 
     private void initView() {
 
-        mCity = (TextView) findViewById(R.id.textview_layout_city);
-        mTemperature = (TextView) findViewById(R.id.textview_layout_temp);
-        mIcone = (TextView) findViewById(R.id.textview_layout_weather_icon);
-        mIconView = (ImageView) findViewById(R.id.textview_layout_weather_iconview);
+        mCityTextView = (TextView) findViewById(R.id.textview_layout_city);
+        mTemperatureTextView = (TextView) findViewById(R.id.textview_layout_temp);
+        mIconeTextView = (TextView) findViewById(R.id.textview_layout_weather_icon);
+        mIconViewTextView = (ImageView) findViewById(R.id.textview_layout_weather_iconview);
+
+        mWyeatherPredictionButton = (Button) findViewById(R.id.button_weather_prediction);
+        mWyeatherPredictionButton.setOnClickListener(this);
 
     }
 
     private void initSharedPreferences() {
         if (sharedpreferences.contains(City)) {
-            city = sharedpreferences.getString(City, "");
+            mCity = sharedpreferences.getString(City, "");
         } else {
 
-            city = "Sydney,AU";
+            mCity = "Sydney,AU";
             editor = sharedpreferences.edit();
-            editor.putString(City, city);
+            editor.putString(City, mCity);
             editor.commit();
         }
     }
 
     private void updateWeatherData(String city) {
 
-        JSONWeatherTask task = new JSONWeatherTask();
+        responseOneDayWeatherTask task = new responseOneDayWeatherTask();
         task.execute(new String[] { city });
     }
 
-    private class JSONWeatherTask extends
-            AsyncTask<String, Void, WeatherWrapper> {
+    private void updateWeatherResponseData(String city, String numOfDays) {
+
+        weatherResponseTask task = new weatherResponseTask();
+        task.execute(new String[] { city, numOfDays });
+    }
+
+    private class responseOneDayWeatherTask extends
+            AsyncTask<String, Void, WeatherResponseOneDayWrapper> {
 
         @Override
-        protected WeatherWrapper doInBackground(String... params) {
-            WeatherWrapper weatherWrapper = new WeatherWrapper();
-            String data = ((new WeatherHelper()).getWeatherData(params[0]));
+        protected WeatherResponseOneDayWrapper doInBackground(String... params) {
+            WeatherResponseOneDayWrapper weatherWrapper = new WeatherResponseOneDayWrapper();
+
+            String city = params[0];
+
+            String data = ((new WeatherHelper()).getWeatherData(city));
 
             Gson gson = new GsonBuilder().create();
-            weatherWrapper = gson.fromJson(data, WeatherWrapper.class);
+            weatherWrapper = gson.fromJson(data,
+                    WeatherResponseOneDayWrapper.class);
 
-            // try {
-            //
-            // weatherWrapper = WeatherHelper.getWeather(data);
-            //
-            // } catch (JSONException e) {
-            // e.printStackTrace();
-            // }
             return weatherWrapper;
 
         }
 
         @Override
-        protected void onPostExecute(WeatherWrapper weatherWrapper) {
+        protected void onPostExecute(WeatherResponseOneDayWrapper weatherWrapper) {
             super.onPostExecute(weatherWrapper);
 
-            Log.v("adnen", "Main Activity");
-            Log.v("adnen", "Latitude = "
+            Log.v(LOG_TAG, "Main Activity");
+            Log.v(LOG_TAG, "Latitude = "
                     + weatherWrapper.getCoordinate().getLatitude());
-            Log.v("adnen", "City = " + weatherWrapper.getCity());
-            Log.v("adnen", "City = " + weatherWrapper.getSys().getCountry());
-            Log.v("adnen", "City = "
+            Log.v(LOG_TAG, "City = " + weatherWrapper.getCity());
+            Log.v(LOG_TAG, "Country = " + weatherWrapper.getSys().getCountry());
+            Log.v(LOG_TAG, "Temperature = "
                     + weatherWrapper.getMain().getTemperature());
 
             String city = weatherWrapper.getCity();
@@ -129,9 +169,9 @@ public class MainActivity extends ActionBarActivity {
 
             String icon = weatherWrapper.getWeatherList().get(0).getIcon();
 
-            mCity.setText(city + "," + country);
-            mTemperature.setText(Math.round((convertTempCelsius(temperature)))
-                    + "°C");
+            mCityTextView.setText(city + "," + country);
+            mTemperatureTextView.setText(Math
+                    .round((convertTempCelsius(temperature))) + "°C");
 
             setWeatherIcon(icon);
             // mIcone.setText(icon);
@@ -139,13 +179,102 @@ public class MainActivity extends ActionBarActivity {
             updateIconeView(icon);
         }
 
-        
+    }
+
+    private class weatherResponseTask extends
+            AsyncTask<String, Void, WeatherResponseWrapper> {
+
+        @Override
+        protected WeatherResponseWrapper doInBackground(String... params) {
+
+            WeatherResponseWrapper weatherWrapper = new WeatherResponseWrapper();
+
+            String city = params[0];
+            String numberOfDays = params[1];
+
+            String data = ((new WeatherResponseHelper())
+                    .getWeatherResponseData(city, numberOfDays));
+
+            Gson gson = new GsonBuilder().create();
+            weatherWrapper = gson.fromJson(data, WeatherResponseWrapper.class);
+
+            return weatherWrapper;
+
+        }
+
+        @Override
+        protected void onPostExecute(WeatherResponseWrapper weatherWrapper) {
+            super.onPostExecute(weatherWrapper);
+
+            mWeather.setCity(weatherWrapper.getCity().getName());
+            mWeather.setCountry(weatherWrapper.getCity().getCountry());
+            mWeather.setLatitude(weatherWrapper.getCity().getCoord()
+                    .getLatitude());
+            mWeather.setLongitude(weatherWrapper.getCity().getCoord()
+                    .getLongitude());
+
+            for (List WeatherWrapperList : weatherWrapper.getLists()) {
+
+                mPrevision = new WeatherWrapper.Prevision();
+
+                mPrevision.setId(WeatherWrapperList.getWeathers().get(0)
+                        .getId());
+                mPrevision.setDate(WeatherWrapperList.getDate());
+                mPrevision.setDescription(WeatherWrapperList.getWeathers()
+                        .get(0).getDescription());
+                mPrevision.setMain(WeatherWrapperList.getWeathers().get(0)
+                        .getMain());
+                mPrevision.setIcon(WeatherWrapperList.getWeathers().get(0)
+                        .getIcon());
+                mPrevision.setMax(WeatherWrapperList.getTemperature().getMax());
+                mPrevision.setMin(WeatherWrapperList.getTemperature().getMin());
+                mPrevision.setDay(WeatherWrapperList.getTemperature().getDay());
+                mPrevision.setNight(WeatherWrapperList.getTemperature()
+                        .getNight());
+                mPrevision.setMorning(WeatherWrapperList.getTemperature()
+                        .getMorning());
+                mPrevision.setEvening(WeatherWrapperList.getTemperature()
+                        .getEvening());
+
+                mListPrevisions.add(mPrevision);
+            }
+
+            mWeather.setPrevision(mListPrevisions);
+
+            // int id = weatherWrapper.getWeatherList().get(0).getId();
+            // long sunrise = weatherWrapper.getSys().getSunrise();
+            // long sunset = weatherWrapper.getSys().getSunset();
+
+            String icon = weatherWrapper.getLists().get(0).getWeathers().get(0)
+                    .getIcon();
+
+            // setWeatherIcon(icon);
+            // mIcone.setText(icon);
+
+            // updateIconeView(icon);
+        }
+
     }
 
     private double convertTempCelsius(double currentTemp) {
 
         double convertedTemp = currentTemp - 273.15;
+
         return convertedTemp;
+    }
+
+    public Calendar convertTimestampToCalendar(long dateTimestamp) {
+
+        String result = null;
+
+        Date dateTime = new Date(dateTimestamp);
+
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(dateTime);
+
+        return calendar;
+
     }
 
     private void showInputDialog() {
@@ -162,16 +291,16 @@ public class MainActivity extends ActionBarActivity {
         });
         builder.show();
     }
-    
+
     private void updateIconeView(String icon) {
-        
+
         Resources res = getResources();
         String mDrawableName = "ic_weather_" + icon;
         int resID = res.getIdentifier(mDrawableName, "drawable",
                 getPackageName());
         Drawable drawable = res.getDrawable(resID);
-        mIconView.setImageDrawable(drawable);
-        
+        mIconViewTextView.setImageDrawable(drawable);
+
     }
 
     private void setWeatherIcon(String icon) {
@@ -179,75 +308,75 @@ public class MainActivity extends ActionBarActivity {
         String currentIcon = icon;
 
         if (currentIcon.equals("01d")) {
-            mIcone.setText("sky is clear, day");
+            mIconeTextView.setText("sky is clear, day");
         }
 
         else if (currentIcon.equals("01n")) {
-            mIcone.setText("sky is clear, night");
+            mIconeTextView.setText("sky is clear, night");
         }
 
         else if (currentIcon.equals("02d")) {
-            mIcone.setText("few clouds, day");
+            mIconeTextView.setText("few clouds, day");
         }
 
         else if (currentIcon.equals("02n")) {
-            mIcone.setText("few clouds, night");
+            mIconeTextView.setText("few clouds, night");
         }
 
         else if (currentIcon.equals("03d")) {
-            mIcone.setText("scattered clouds, day");
+            mIconeTextView.setText("scattered clouds, day");
         }
 
         else if (currentIcon.equals("03n")) {
-            mIcone.setText("scattered clouds, night");
+            mIconeTextView.setText("scattered clouds, night");
         }
 
         else if (currentIcon.equals("04d")) {
-            mIcone.setText("broken clouds, day");
+            mIconeTextView.setText("broken clouds, day");
         }
 
         else if (currentIcon.equals("04n")) {
-            mIcone.setText("broken clouds, night");
+            mIconeTextView.setText("broken clouds, night");
         }
 
         else if (currentIcon.equals("09d")) {
-            mIcone.setText("shower rain, day");
+            mIconeTextView.setText("shower rain, day");
         }
 
         else if (currentIcon.equals("09n")) {
-            mIcone.setText("shower rain, night");
+            mIconeTextView.setText("shower rain, night");
         }
 
         else if (currentIcon.equals("10d")) {
-            mIcone.setText("Rain, day");
+            mIconeTextView.setText("Rain, day");
         }
 
         else if (currentIcon.equals("10n")) {
-            mIcone.setText("Rain, night");
+            mIconeTextView.setText("Rain, night");
         }
 
         else if (currentIcon.equals("11d")) {
-            mIcone.setText("Thunderstorm, day");
+            mIconeTextView.setText("Thunderstorm, day");
         }
 
         else if (currentIcon.equals("11n")) {
-            mIcone.setText("Thunderstorm, night");
+            mIconeTextView.setText("Thunderstorm, night");
         }
 
         else if (currentIcon.equals("13d")) {
-            mIcone.setText("snow, day");
+            mIconeTextView.setText("snow, day");
         }
 
         else if (currentIcon.equals("13n")) {
-            mIcone.setText("snow, night");
+            mIconeTextView.setText("snow, night");
         }
 
         else if (currentIcon.equals("50d")) {
-            mIcone.setText("mist, day");
+            mIconeTextView.setText("mist, day");
         }
 
         else if (currentIcon.equals("50n")) {
-            mIcone.setText("mist, night");
+            mIconeTextView.setText("mist, night");
         }
 
         // weatherIcon.setText(icon);
@@ -278,6 +407,65 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+        case R.id.button_weather_prediction:
+            showPrevisions();
+            break;
+        default:
+            break;
+        }
+
+    }
+
+    private void showPrevisions() {
+
+        Log.v(LOG_TAG, "show Previsions");
+
+        Log.v(LOG_TAG, "City name = " + mWeather.getCity());
+        Log.v(LOG_TAG, "City country = " + mWeather.getCountry());
+        Log.v(LOG_TAG, "Latitude = " + mWeather.getLatitude());
+        Log.v(LOG_TAG, "Longitude = " + mWeather.getLongitude());
+
+        int i = 0;
+
+        for (WeatherWrapper.Prevision prevision : mWeather.getPrevision()) {
+
+            i++;
+
+            Log.v(LOG_TAG, "Prevision n°" + i);
+
+            Log.v(LOG_TAG, "Date = " + prevision.getDate());
+            Log.v(LOG_TAG, "Id = " + prevision.getId());
+            Log.v(LOG_TAG, "Main = " + prevision.getMain());
+            Log.v(LOG_TAG, "Description = " + prevision.getDescription());
+            Log.v(LOG_TAG, "Temp Min = " + prevision.getMin());
+            Log.v(LOG_TAG, "Temp Max = " + prevision.getMax());
+            Log.v(LOG_TAG, "Temp Day = " + prevision.getDay());
+            Log.v(LOG_TAG, "Temp Morning = " + prevision.getMorning());
+            Log.v(LOG_TAG, "Temp Evening = " + prevision.getEvening());
+            Log.v(LOG_TAG, "Temp Night = " + prevision.getNight());
+            Log.v(LOG_TAG, "Icone = " + prevision.getIcon());
+
+            Log.v(LOG_TAG, "-----------------------------------");
+
+        }
+
+        // Calendar calendar = convertTimestampToCalendar(weatherWrapper
+        // .getLists().get(0).getDate());
+        //
+        // int year = calendar.get(Calendar.YEAR);
+        // int month = calendar.get(Calendar.MONTH);
+        // int date = calendar.get(Calendar.DATE);
+        // int day = calendar.get(Calendar.DAY_OF_MONTH);
+        // int hour = calendar.get(Calendar.HOUR);
+        // int minute = calendar.get(Calendar.MINUTE);
+        //
+        // Log.v(LOG_TAG, "Date = " + date + " " + hour + ":" + minute);
+
     }
 
 }

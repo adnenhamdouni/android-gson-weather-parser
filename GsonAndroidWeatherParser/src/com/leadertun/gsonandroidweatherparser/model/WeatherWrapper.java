@@ -2,33 +2,26 @@ package com.leadertun.gsonandroidweatherparser.model;
 
 import java.util.ArrayList;
 
-import com.google.gson.annotations.SerializedName;
-
 public class WeatherWrapper {
 
-    @SerializedName("name")
     private String mCity;
-    @SerializedName("coord")
-    private Coordinate mCoordinate;
-    @SerializedName("sys")
-    private Sys mSys;
-//    @SerializedName("weather")
-//    private Weather mWeather;
-    @SerializedName("main")
-    private Main mMain;
-    @SerializedName("weather")
-    private ArrayList<Weather> mWeatherList;
+    private String mCountry;
+    private float mLongitude;
+    private float mLatitude;
+    ArrayList<Prevision> mPrevision;
 
-    public WeatherWrapper() {
-    }
-
-    public WeatherWrapper(String city) {
-        
-        mCity = city;
-    }
+    public WeatherWrapper() {}
     
-    public String getCity() {
+    public WeatherWrapper(String city, String country, float longitude,
+            float latitude) {
+        super();
+        this.mCity = city;
+        this.mCountry = country;
+        this.mLongitude = longitude;
+        this.mLatitude = latitude;
+    }
 
+    public String getCity() {
         return mCity;
     }
 
@@ -36,229 +29,163 @@ public class WeatherWrapper {
         this.mCity = city;
     }
 
-    public Coordinate getCoordinate() {
+    public String getCountry() {
+        return mCountry;
+    }
 
-        return mCoordinate;
+    public void setCountry(String country) {
+        this.mCountry = country;
+    }
+
+    public float getLongitude() {
+        return mLongitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.mLongitude = longitude;
+    }
+
+    public float getLatitude() {
+        return mLatitude;
+    }
+
+    public void setLatitude(float latitude) {
+        this.mLatitude = latitude;
+    }
+
+    public ArrayList<Prevision> getPrevision() {
+        return mPrevision;
     }
     
-    public Sys getSys() {
-        return mSys;
-    }
-
-//    public Weather getWeather() {
-//        return mWeather;
-//    }
     
-    
-
-    public Main getMain() {
-        return mMain;
-    }
-
-    public ArrayList<Weather> getWeatherList() {
-        return mWeatherList;
+    public void setPrevision(ArrayList<Prevision> prevision) {
+        this.mPrevision = prevision;
     }
 
 
 
+    public static class Prevision {
 
-    public class Coordinate {
-        
-        @SerializedName("lon")
-        private float mLongitude;
-        @SerializedName("lat")
-        private float mLatitude;
-
-        public Coordinate(float longitude, float latitude) {
-            mLongitude = longitude;
-            mLatitude = latitude;
-        }
-
-        public float getLongitude() {
-            return mLongitude;
-        }
-
-        public void setLongitude(float longitude) {
-            this.mLongitude = longitude;
-        }
-
-        public float getLatitude() {
-            return mLatitude;
-        }
-
-        public void setLatitude(float latitude) {
-            this.mLatitude = latitude;
-        }
-
-    }
-    
-    public class Sys {
-        
-        @SerializedName("id")
         private int mId;
-        @SerializedName("type")
-        private String mType;
-        @SerializedName("message")
-        private float mMessage;
-        @SerializedName("country")
-        private String mCountry;
-        @SerializedName("sunrise")
-        private long mSunrise;
-        @SerializedName("sunset")
-        private long mSunset;
-        
-        public Sys(int id, String type, float message, String country,
-                long sunrise, long sunset) {
-            
-            mId = id;
-            mType = type;
-            mMessage = message;
-            mCountry = country;
-            mSunrise = sunrise;
-            mSunset = sunset;
-        }
-        
-        public int getId() {
-            return mId;
-        }
-        public void setId(int id) {
-            this.mId = id;
-        }
-        public String getType() {
-            return mType;
-        }
-        public void setType(String type) {
-            this.mType = type;
-        }
-        public float getMessage() {
-            return mMessage;
-        }
-        public void setMessage(float message) {
-            this.mMessage = message;
-        }
-        public String getCountry() {
-            return mCountry;
-        }
-        public void setCountry(String country) {
-            this.mCountry = country;
-        }
-        public long getSunrise() {
-            return mSunrise;
-        }
-        public void setSunrise(long sunrise) {
-            this.mSunrise = sunrise;
-        }
-        public long getSunset() {
-            return mSunset;
-        }
-        public void setSunset(long sunset) {
-            this.mSunset = sunset;
-        }
-        
-    }
-    
-    public class Weather {
-
-        @SerializedName("id")
-        private int mId;
-        @SerializedName("main")
+        private long mDate;
+        private float mMin;
+        private float mMax;
+        private float mDay;
+        private float mNight;
+        private float mEvening;
+        private float mMorning;
         private String mMain;
-        @SerializedName("description")
         private String mDescription;
-        @SerializedName("icon")
         private String mIcon;
-        
-        public Weather(int id, String main, String description, String icon) {
-            
-            mId = id;
-            mMain = main;
-            mDescription = description;
-            mIcon = icon;
+
+        public Prevision() {
         }
-        
+
+        public Prevision(int id, long mDate, float mMin, float mMax,
+                float mDay, float mNight, float mEvening, float mMorning,
+                String main, String description, String icon) {
+            super();
+            this.mId = id;
+            this.mDate = mDate;
+            this.mMin = mMin;
+            this.mMax = mMax;
+            this.mDay = mDay;
+            this.mNight = mNight;
+            this.mEvening = mEvening;
+            this.mMorning = mMorning;
+            this.mMain = main;
+            this.mDescription = description;
+            this.mIcon = icon;
+        }
+
         public int getId() {
             return mId;
         }
+
         public void setId(int id) {
             this.mId = id;
         }
+
         public String getMain() {
             return mMain;
         }
+
         public void setMain(String main) {
             this.mMain = main;
         }
+
         public String getDescription() {
             return mDescription;
         }
+
         public void setDescription(String description) {
             this.mDescription = description;
         }
+
         public String getIcon() {
             return mIcon;
         }
+
         public void setIcon(String icon) {
             this.mIcon = icon;
         }
-        
-    }
-    
-    public class Main {
 
-        @SerializedName("temp")
-        private float mTemperature;
-        @SerializedName("pressure")
-        private float mPressure;
-        @SerializedName("temp_min")
-        private float mTemperatureMin;
-        @SerializedName("temp_max")
-        private float mTemperatureMax;
-        @SerializedName("humidity")
-        private float mHumidity;
-        
-        public Main(float temperature, float pressure, float temperatureMin, float temperatureMax,
-                float humidity) {
-            
-            mTemperature = temperature;
-            mPressure = pressure;
-            mTemperatureMin = temperatureMin;
-            mTemperatureMax = temperatureMax;
-            mHumidity = humidity;
+        public long getDate() {
+            return mDate;
         }
-        
-        public float getTemperature() {
-            return mTemperature;
+
+        public void setDate(long date) {
+            this.mDate = date;
         }
-        public void setTemperature(float temp) {
-            this.mTemperature = temp;
+
+        public float getMin() {
+            return mMin;
         }
-        public float getPressure() {
-            return mPressure;
+
+        public void setMin(float min) {
+            this.mMin = min;
         }
-        public void setPressure(float pressure) {
-            this.mPressure = pressure;
+
+        public float getMax() {
+            return mMax;
         }
-        public float getTemperatureMin() {
-            return mTemperatureMin;
+
+        public void setMax(float max) {
+            this.mMax = max;
         }
-        public void setTemperatureMin(float temperatureMin) {
-            this.mTemperatureMin = temperatureMin;
+
+        public float getDay() {
+            return mDay;
         }
-        public float getTemperatureMax() {
-            return mTemperatureMax;
+
+        public void setDay(float day) {
+            this.mDay = day;
         }
-        public void setTemperatureMax(float temperatureMax) {
-            this.mTemperatureMax = temperatureMax;
+
+        public float getNight() {
+            return mNight;
         }
-        public float getHumidity() {
-            return mHumidity;
+
+        public void setNight(float night) {
+            this.mNight = night;
         }
-        public void setHumidity(float humidity) {
-            this.mHumidity = humidity;
+
+        public float getEvening() {
+            return mEvening;
         }
-        
+
+        public void setEvening(float evening) {
+            this.mEvening = evening;
+        }
+
+        public float getMorning() {
+            return mMorning;
+        }
+
+        public void setMorning(float morning) {
+            this.mMorning = morning;
+        }
+
     }
-    
-    
 
 }
